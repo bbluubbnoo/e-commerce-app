@@ -8,7 +8,7 @@ import {
 import { FlashList } from "@shopify/flash-list";
 import { useGetProductsQuery } from "../api/products-api";
 import { useDispatch ,useSelector } from "react-redux";
-import { selectCategory, selectSearch, selectSort } from "../selectors/ui-selectors";
+import { selectCategory, selectSearch, selectSort, selectTheme } from "../selectors/ui-selectors";
 import type { RootState, AppDispatch } from "../store";
 import CategoryFilter from "../components/category-filter";
 import ProductCard from "../components/product-card";
@@ -19,6 +19,8 @@ import { toggleFavorite } from "../slices/favorites-slice";
 import CartSummaryBar from "../components/cart-summary-bar";
 import CartModal from "../components/cart-modal";
 import SortBar from "../components/sort-bar";
+import ThemeToggle from "../components/theme-toggle";
+
 
 
 
@@ -31,8 +33,11 @@ const ProductsScreen: React.FC = () => {
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
     const search = useSelector((state: RootState) => selectSearch(state));
     const sort = useSelector((state: RootState) => selectSort(state));
+    const theme = useSelector((state: RootState) => selectTheme(state));
 
     const favoriteIds = useSelector(selectFavoriteIds);
+
+    const isDark = theme === "dark";
 
     const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({
         search,
@@ -117,11 +122,13 @@ const ProductsScreen: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>E-commerce App</Text>
-            <Text style={styles.subtitle}>
+        <View style={[styles.container, isDark && styles.containerDark]}>
+            <Text style={[styles.title, isDark && styles.titleDark]}>E-commerce App</Text>
+            <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
                 Products loaded from the DummyJSON Products API.
             </Text>
+
+            <ThemeToggle />
 
             {/* Nieuwe zoekbalk */}
             <SearchBar />
@@ -218,5 +225,14 @@ const styles = StyleSheet.create({
         color: "#2563eb",
         textDecorationLine: "underline",
         marginTop: 4,
+    },
+    containerDark: {
+        backgroundColor: "#020617", // donker
+    },
+    titleDark: {
+        color: "#f9fafb",
+    },
+    subtitleDark: {
+        color: "#e5e7eb",
     },
 });
