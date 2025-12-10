@@ -12,12 +12,16 @@ import { selectCategory } from "../selectors/ui-selectors";
 import type { RootState } from "../store";
 import CategoryFilter from "../components/category-filter";
 import ProductCard from "../components/product-card";
+import SearchBar from "../components/search-bar";
+import { selectSearch } from "../selectors/ui-selectors";
+
 
 const ProductsScreen: React.FC = () => {
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
+    const search = useSelector((state: RootState) => selectSearch(state));
 
     const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({
-        search: undefined,
+        search,
         category: activeCategory,
         limit: 20,
         skip: 0,
@@ -57,6 +61,9 @@ const ProductsScreen: React.FC = () => {
             <Text style={styles.subtitle}>
                 Products loaded from the DummyJSON Products API.
             </Text>
+
+            {/* Nieuwe zoekbalk */}
+            <SearchBar />
 
             {/* Nieuwe filterbalk voor categorieën */}
             <CategoryFilter />
