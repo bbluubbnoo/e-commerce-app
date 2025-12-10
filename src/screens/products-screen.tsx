@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
     View,
     Text,
@@ -14,9 +14,13 @@ import CategoryFilter from "../components/category-filter";
 import ProductCard from "../components/product-card";
 import SearchBar from "../components/search-bar";
 import { selectSearch } from "../selectors/ui-selectors";
+import ProductDetailsModal from "../components/product-details-modal";
+
 
 
 const ProductsScreen: React.FC = () => {
+    const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
     const search = useSelector((state: RootState) => selectSearch(state));
 
@@ -26,6 +30,14 @@ const ProductsScreen: React.FC = () => {
         limit: 20,
         skip: 0,
     });
+
+    const handleOpenDetails = useCallback((id: number) => {
+        setSelectedProductId(id);
+    }, []);
+
+    const handleCloseDetails = useCallback(() => {
+        setSelectedProductId(null);
+    }, []);
 
     if (isLoading) {
         return (
@@ -75,8 +87,16 @@ const ProductsScreen: React.FC = () => {
                 refreshing={isFetching}
                 onRefresh={refetch}
                 renderItem={({ item }) => (
-                    <ProductCard product={item}/>
+                    <ProductCard
+                        product={item}
+                        onPress={() => handleOpenDetails(item.id)}
+                    />
                 )}
+            />
+            <ProductDetailsModal
+                productId={selectedProductId}
+                visible={selectedProductId !== null}
+                onClose={handleCloseDetails}
             />
         </View>
     );
