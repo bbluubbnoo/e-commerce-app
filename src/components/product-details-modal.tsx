@@ -10,6 +10,9 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { useGetProductByIdQuery } from "../api/products-api";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store";
+import { addToCart } from "../slices/cart-slice";
 
 type Props = {
     productId: number | null;
@@ -18,12 +21,26 @@ type Props = {
 };
 
 const ProductDetailsModal: React.FC<Props> = ({ productId, visible, onClose }) => {
+    const dispatch = useDispatch<AppDispatch>();
+
     const { data, isLoading, isError, refetch } = useGetProductByIdQuery(
         productId ?? 0,
         {
             skip: !productId || !visible, // do not fetch when no id or not visible
         }
     );
+    const handleAddToCart = () => {
+        if (!data) return;
+
+        dispatch(
+            addToCart({
+                id: data.id,
+                title: data.title,
+                price: data.price,
+                thumbnail: data.thumbnail,
+            })
+        );
+    };
 
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -65,10 +82,15 @@ const ProductDetailsModal: React.FC<Props> = ({ productId, visible, onClose }) =
                         <Text style={styles.sectionTitle}>Stock</Text>
                         <Text style={styles.description}>{data.stock} items available</Text>
 
-                        {/* Later kunnen we hier "Add to cart" en "Favorite" knoppen bijzetten */}
-                        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
+                        <View style={styles.buttonsRow}>
+                            <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
+                                <Text style={styles.addButtonText}>Add to cart</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
                     </ScrollView>
                 )}
             </View>
@@ -151,6 +173,22 @@ const styles = StyleSheet.create({
         backgroundColor: "#111827",
     },
     closeButtonText: {
+        color: "#ffffff",
+        fontWeight: "600",
+    },
+    buttonsRow: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 8,
+        marginTop: 20,
+    },
+    addButton: {
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 999,
+        backgroundColor: "#2563eb",
+    },
+    addButtonText: {
         color: "#ffffff",
         fontWeight: "600",
     },

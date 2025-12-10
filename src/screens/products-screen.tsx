@@ -17,12 +17,17 @@ import { selectSearch } from "../selectors/ui-selectors";
 import ProductDetailsModal from "../components/product-details-modal";
 import { selectFavoriteIds } from "../selectors/favorites-selectors";
 import { toggleFavorite } from "../slices/favorites-slice";
+import CartSummaryBar from "../components/cart-summary-bar";
+import CartModal from "../components/cart-modal";
+
+
 
 
 const ProductsScreen: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+    const [isCartVisible, setIsCartVisible] = useState(false);
 
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
     const search = useSelector((state: RootState) => selectSearch(state));
@@ -50,6 +55,14 @@ const ProductsScreen: React.FC = () => {
         },
         [dispatch]
     );
+
+    const handleOpenCart = useCallback(() => {
+        setIsCartVisible(true);
+    }, []);
+
+    const handleCloseCart = useCallback(() => {
+        setIsCartVisible(false);
+    }, []);
 
     if (isLoading) {
         return (
@@ -92,6 +105,9 @@ const ProductsScreen: React.FC = () => {
             {/* Nieuwe filterbalk voor categorieën */}
             <CategoryFilter />
 
+            {/* Cart summary bar, only visible when cart has items */}
+            <CartSummaryBar onPress={handleOpenCart} />
+
             <FlashList
                 data={data.products}
                 keyExtractor={(item) => item.id.toString()}
@@ -112,6 +128,9 @@ const ProductsScreen: React.FC = () => {
                 visible={selectedProductId !== null}
                 onClose={handleCloseDetails}
             />
+
+            <CartModal visible={isCartVisible} onClose={handleCloseCart} />
+
         </View>
     );
 };
