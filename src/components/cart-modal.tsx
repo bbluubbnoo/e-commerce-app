@@ -13,7 +13,13 @@ import {
     selectCartTotalPrice,
 } from "../selectors/cart-selectors";
 import type { RootState, AppDispatch } from "../store";
-import { clearCart, removeFromCart, increaseQuantity, decreaseQuantity } from "../slices/cart-slice";
+import {
+    clearCart,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+} from "../slices/cart-slice";
+import { selectTheme } from "../selectors/ui-selectors";
 
 type Props = {
     visible: boolean;
@@ -22,6 +28,9 @@ type Props = {
 
 const CartModal: React.FC<Props> = ({ visible, onClose }) => {
     const dispatch = useDispatch<AppDispatch>();
+
+    const theme = useSelector((state: RootState) => selectTheme(state));
+    const isDark = theme === "dark";
 
     const items = useSelector((state: RootState) => selectCartItems(state));
     const totalPrice = useSelector((state: RootState) =>
@@ -46,12 +55,16 @@ const CartModal: React.FC<Props> = ({ visible, onClose }) => {
 
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-            <View style={styles.container}>
-                <Text style={styles.title}>Your Cart</Text>
+            <View style={[styles.container, isDark && styles.containerDark]}>
+                <Text style={[styles.title, isDark && styles.titleDark]}>Your Cart</Text>
 
                 {items.length === 0 ? (
                     <View style={styles.center}>
-                        <Text style={styles.infoText}>Your cart is empty.</Text>
+                        <Text
+                            style={[styles.infoText, isDark && styles.textSecondaryDark]}
+                        >
+                            Your cart is empty.
+                        </Text>
 
                         <TouchableOpacity
                             style={styles.buttonPrimary}
@@ -66,14 +79,26 @@ const CartModal: React.FC<Props> = ({ visible, onClose }) => {
                             data={items}
                             keyExtractor={(item) => item.id.toString()}
                             contentContainerStyle={styles.listContent}
-
                             renderItem={({ item }) => (
                                 <View style={styles.itemRow}>
                                     <View style={styles.itemInfo}>
-                                        <Text style={styles.itemTitle} numberOfLines={1}>
+                                        <Text
+                                            style={[
+                                                styles.itemTitle,
+                                                isDark && styles.textPrimaryDark,
+                                            ]}
+                                            numberOfLines={1}
+                                        >
                                             {item.title}
                                         </Text>
-                                        <Text style={styles.itemSubtitle}>€ {item.price}</Text>
+                                        <Text
+                                            style={[
+                                                styles.itemSubtitle,
+                                                isDark && styles.textSecondaryDark,
+                                            ]}
+                                        >
+                                            € {item.price}
+                                        </Text>
 
                                         <View style={styles.quantityRow}>
                                             <TouchableOpacity
@@ -83,7 +108,9 @@ const CartModal: React.FC<Props> = ({ visible, onClose }) => {
                                                 <Text style={styles.quantityButtonText}>-</Text>
                                             </TouchableOpacity>
 
-                                            <Text style={styles.quantityText}>{item.quantity}</Text>
+                                            <Text style={styles.quantityText}>
+                                                {item.quantity}
+                                            </Text>
 
                                             <TouchableOpacity
                                                 style={styles.quantityButton}
@@ -95,7 +122,12 @@ const CartModal: React.FC<Props> = ({ visible, onClose }) => {
                                     </View>
 
                                     <View style={styles.itemRight}>
-                                        <Text style={styles.itemTotal}>
+                                        <Text
+                                            style={[
+                                                styles.itemTotal,
+                                                isDark && styles.textPrimaryDark,
+                                            ]}
+                                        >
                                             € {(item.price * item.quantity).toFixed(2)}
                                         </Text>
 
@@ -111,14 +143,25 @@ const CartModal: React.FC<Props> = ({ visible, onClose }) => {
                         />
 
                         <View style={styles.footer}>
-                            <Text style={styles.totalText}>
+                            <Text
+                                style={[
+                                    styles.totalText,
+                                    isDark && styles.textPrimaryDark,
+                                ]}
+                            >
                                 Total: € {totalPrice.toFixed(2)}
                             </Text>
                             <View style={styles.footerButtons}>
-                                <TouchableOpacity style={styles.buttonSecondary} onPress={handleClear}>
+                                <TouchableOpacity
+                                    style={styles.buttonSecondary}
+                                    onPress={handleClear}
+                                >
                                     <Text style={styles.buttonSecondaryText}>Clear cart</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.buttonPrimary} onPress={onClose}>
+                                <TouchableOpacity
+                                    style={styles.buttonPrimary}
+                                    onPress={onClose}
+                                >
                                     <Text style={styles.buttonPrimaryText}>Close</Text>
                                 </TouchableOpacity>
                             </View>
@@ -138,6 +181,9 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: "#f9fafb",
     },
+    containerDark: {
+        backgroundColor: "#020617",
+    },
     center: {
         flex: 1,
         justifyContent: "center",
@@ -151,6 +197,9 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: "700",
         marginBottom: 12,
+    },
+    titleDark: {
+        color: "#f9fafb",
     },
     infoText: {
         fontSize: 14,
@@ -252,5 +301,11 @@ const styles = StyleSheet.create({
     itemRight: {
         alignItems: "flex-end",
         gap: 4,
+    },
+    textPrimaryDark: {
+        color: "#f9fafb",
+    },
+    textSecondaryDark: {
+        color: "#e5e7eb",
     },
 });

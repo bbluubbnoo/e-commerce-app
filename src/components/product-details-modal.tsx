@@ -10,9 +10,11 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { useGetProductByIdQuery } from "../api/products-api";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../store";
 import { addToCart } from "../slices/cart-slice";
+import { selectTheme } from "../selectors/ui-selectors";
+
 
 type Props = {
     productId: number | null;
@@ -22,6 +24,8 @@ type Props = {
 
 const ProductDetailsModal: React.FC<Props> = ({ productId, visible, onClose }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const theme = useSelector((state: RootState) => selectTheme(state));
+    const isDark = theme === "dark";
 
     const { data, isLoading, isError, refetch } = useGetProductByIdQuery(
         productId ?? 0,
@@ -44,18 +48,25 @@ const ProductDetailsModal: React.FC<Props> = ({ productId, visible, onClose }) =
 
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-            <View style={styles.container}>
+            <View style={[styles.container, isDark && styles.containerDark]}>
                 {isLoading && (
                     <View style={styles.center}>
                         <ActivityIndicator />
-                        <Text style={styles.infoText}>Loading product details...</Text>
+                        <Text style={[styles.infoText, isDark && styles.textDark]}>
+                            Loading product details...
+                        </Text>
                     </View>
                 )}
 
                 {isError && (
                     <View style={styles.center}>
-                        <Text style={styles.errorText}>Failed to load details.</Text>
-                        <Text style={styles.linkText} onPress={() => refetch()}>
+                        <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
+                            Failed to load details.
+                        </Text>
+                        <Text
+                            style={[styles.linkText, isDark && styles.linkTextDark]}
+                            onPress={() => refetch()}
+                        >
                             Tap to retry
                         </Text>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -68,19 +79,33 @@ const ProductDetailsModal: React.FC<Props> = ({ productId, visible, onClose }) =
                     <ScrollView contentContainerStyle={styles.scrollContent}>
                         <Image source={{ uri: data.thumbnail }} style={styles.image} />
 
-                        <Text style={styles.title}>{data.title}</Text>
-                        <Text style={styles.brandCategory}>
+                        <Text style={[styles.title, isDark && styles.textPrimaryDark]}>
+                            {data.title}
+                        </Text>
+                        <Text style={[styles.brandCategory, isDark && styles.textSecondaryDark]}>
                             {data.brand} • {data.category}
                         </Text>
 
-                        <Text style={styles.price}>€ {data.price}</Text>
-                        <Text style={styles.rating}>⭐ {data.rating.toFixed(1)}</Text>
+                        <Text style={[styles.price, isDark && styles.textPrimaryDark]}>
+                            € {data.price}
+                        </Text>
+                        <Text style={[styles.rating, isDark && styles.textSecondaryDark]}>
+                            ⭐ {data.rating.toFixed(1)}
+                        </Text>
 
-                        <Text style={styles.sectionTitle}>Description</Text>
-                        <Text style={styles.description}>{data.description}</Text>
+                        <Text style={[styles.sectionTitle, isDark && styles.textPrimaryDark]}>
+                            Description
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.textSecondaryDark]}>
+                            {data.description}
+                        </Text>
 
-                        <Text style={styles.sectionTitle}>Stock</Text>
-                        <Text style={styles.description}>{data.stock} items available</Text>
+                        <Text style={[styles.sectionTitle, isDark && styles.textPrimaryDark]}>
+                            Stock
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.textSecondaryDark]}>
+                            {data.stock} items available
+                        </Text>
 
                         <View style={styles.buttonsRow}>
                             <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
@@ -191,5 +216,23 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: "#ffffff",
         fontWeight: "600",
+    },
+    containerDark: {
+        backgroundColor: "#020617",
+    },
+    textDark: {
+        color: "#e5e7eb",
+    },
+    textPrimaryDark: {
+        color: "#f9fafb",
+    },
+    textSecondaryDark: {
+        color: "#e5e7eb",
+    },
+    errorTextDark: {
+        color: "#fecaca",
+    },
+    linkTextDark: {
+        color: "#93c5fd",
     },
 });
