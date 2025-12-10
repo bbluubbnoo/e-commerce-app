@@ -54,7 +54,11 @@ export const productsApi = createApi({
                 return `/products?limit=${limit}&skip=${skip}`;
             },
         }),
+        getCategories: builder.query<string[], void>({
+            // This returns an array with all real DummyJSON category names.
+            query: () => "/products/category-list",
+        }),
     }),
 });
 
-export const { useGetProductsQuery } = productsApi;
+export const { useGetProductsQuery, useGetCategoriesQuery } = productsApi;

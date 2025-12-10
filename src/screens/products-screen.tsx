@@ -7,11 +7,17 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useGetProductsQuery } from "../api/products-api";
+import { useSelector } from "react-redux";
+import { selectCategory } from "../selectors/ui-selectors";
+import type { RootState } from "../store";
+import CategoryFilter from "../components/category-filter";
 
 const ProductsScreen: React.FC = () => {
+    const activeCategory = useSelector((state: RootState) => selectCategory(state));
+
     const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({
         search: undefined,
-        category: null,
+        category: activeCategory,
         limit: 20,
         skip: 0,
     });
@@ -51,6 +57,9 @@ const ProductsScreen: React.FC = () => {
                 Products loaded from the DummyJSON Products API.
             </Text>
 
+            {/* Nieuwe filterbalk voor categorieën */}
+            <CategoryFilter />
+
             <FlashList
                 data={data.products}
                 keyExtractor={(item) => item.id.toString()}
@@ -68,6 +77,7 @@ const ProductsScreen: React.FC = () => {
         </View>
     );
 };
+
 
 export default ProductsScreen;
 
