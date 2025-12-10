@@ -5,9 +5,11 @@ import type { Product } from "../api/products-api";
 type Props = {
     product: Product;
     onPress?: () => void;
+    isFavorite?: boolean;
+    onToggleFavorite?: () => void;
 };
 
-const ProductCard: React.FC<Props> = ({ product, onPress }) => {
+const ProductCard: React.FC<Props> = ({ product, onPress, isFavorite, onToggleFavorite }) => {
     return (
         <TouchableOpacity style={styles.card} onPress={onPress}>
             <Image source={{ uri: product.thumbnail }} style={styles.image} />
@@ -19,6 +21,15 @@ const ProductCard: React.FC<Props> = ({ product, onPress }) => {
                 <Text style={styles.category}>{product.category}</Text>
                 <Text style={styles.price}>€ {product.price}</Text>
             </View>
+
+            {/* Favorite button on the right */}
+            <TouchableOpacity
+                style={styles.favoriteButton}
+                onPress={onToggleFavorite}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+                <Text style={styles.favoriteIcon}>{isFavorite ? "♥" : "♡"}</Text>
+            </TouchableOpacity>
         </TouchableOpacity>
     );
 };
@@ -59,5 +70,13 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontSize: 15,
         color: "#2563eb",
+    },
+    favoriteButton: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingLeft: 6,
+    },
+    favoriteIcon: {
+        fontSize: 20,
     },
 });

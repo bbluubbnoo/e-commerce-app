@@ -7,22 +7,27 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useGetProductsQuery } from "../api/products-api";
-import { useSelector } from "react-redux";
+import { useDispatch ,useSelector } from "react-redux";
 import { selectCategory } from "../selectors/ui-selectors";
-import type { RootState } from "../store";
+import type { RootState, AppDispatch } from "../store";
 import CategoryFilter from "../components/category-filter";
 import ProductCard from "../components/product-card";
 import SearchBar from "../components/search-bar";
 import { selectSearch } from "../selectors/ui-selectors";
 import ProductDetailsModal from "../components/product-details-modal";
-
+import { selectFavoriteIds } from "../selectors/favorites-selectors";
+import { toggleFavorite } from "../slices/favorites-slice";
 
 
 const ProductsScreen: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
+
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
     const search = useSelector((state: RootState) => selectSearch(state));
+
+    const favoriteIds = useSelector(selectFavoriteIds);
 
     const { data, isLoading, isError, refetch, isFetching } = useGetProductsQuery({
         search,
@@ -38,6 +43,13 @@ const ProductsScreen: React.FC = () => {
     const handleCloseDetails = useCallback(() => {
         setSelectedProductId(null);
     }, []);
+
+    const handleToggleFavorite = useCallback(
+        (id: number) => {
+            dispatch(toggleFavorite(id));
+        },
+        [dispatch]
+    );
 
     if (isLoading) {
         return (
@@ -90,6 +102,8 @@ const ProductsScreen: React.FC = () => {
                     <ProductCard
                         product={item}
                         onPress={() => handleOpenDetails(item.id)}
+                        isFavorite={favoriteIds.includes(item.id)}
+                        onToggleFavorite={() => handleToggleFavorite(item.id)}
                     />
                 )}
             />
