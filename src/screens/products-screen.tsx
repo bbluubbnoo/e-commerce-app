@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
     View,
     Text,
@@ -8,18 +8,17 @@ import {
 import { FlashList } from "@shopify/flash-list";
 import { useGetProductsQuery } from "../api/products-api";
 import { useDispatch ,useSelector } from "react-redux";
-import { selectCategory } from "../selectors/ui-selectors";
+import { selectCategory, selectSearch, selectSort } from "../selectors/ui-selectors";
 import type { RootState, AppDispatch } from "../store";
 import CategoryFilter from "../components/category-filter";
 import ProductCard from "../components/product-card";
 import SearchBar from "../components/search-bar";
-import { selectSearch } from "../selectors/ui-selectors";
 import ProductDetailsModal from "../components/product-details-modal";
 import { selectFavoriteIds } from "../selectors/favorites-selectors";
 import { toggleFavorite } from "../slices/favorites-slice";
 import CartSummaryBar from "../components/cart-summary-bar";
 import CartModal from "../components/cart-modal";
-
+import SortBar from "../components/sort-bar";
 
 
 
@@ -31,6 +30,7 @@ const ProductsScreen: React.FC = () => {
 
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
     const search = useSelector((state: RootState) => selectSearch(state));
+    const sort = useSelector((state: RootState) => selectSort(state));
 
     const favoriteIds = useSelector(selectFavoriteIds);
 
@@ -63,6 +63,30 @@ const ProductsScreen: React.FC = () => {
     const handleCloseCart = useCallback(() => {
         setIsCartVisible(false);
     }, []);
+
+    const sortedProducts = useMemo(() => {
+        if (!data) {
+            return [];
+        }
+
+        const items = [...data.products];
+
+        switch (sort) {
+            case "priceAsc":
+                items.sort((a, b) => a.price - b.price);
+                break;
+            case "priceDesc":
+                items.sort((a, b) => b.price - a.price);
+                break;
+            case "nameAsc":
+            default:
+                items.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+        }
+
+        return items;
+    }, [data, sort]);
+
 
     if (isLoading) {
         return (
@@ -105,11 +129,14 @@ const ProductsScreen: React.FC = () => {
             {/* Nieuwe filterbalk voor categorieën */}
             <CategoryFilter />
 
+            {/* Nieuwe filterbalk */}
+            <SortBar />
+
             {/* Cart summary bar, only visible when cart has items */}
             <CartSummaryBar onPress={handleOpenCart} />
 
             <FlashList
-                data={data.products}
+                data={sortedProducts}
                 keyExtractor={(item) => item.id.toString()}
                 estimatedItemSize={80}
                 refreshing={isFetching}
