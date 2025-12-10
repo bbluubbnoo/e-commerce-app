@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { selectCategory } from "../selectors/ui-selectors";
 import type { RootState } from "../store";
 import CategoryFilter from "../components/category-filter";
+import ProductCard from "../components/product-card";
 
 const ProductsScreen: React.FC = () => {
     const activeCategory = useSelector((state: RootState) => selectCategory(state));
@@ -67,11 +68,7 @@ const ProductsScreen: React.FC = () => {
                 refreshing={isFetching}
                 onRefresh={refetch}
                 renderItem={({ item }) => (
-                    <View style={styles.itemCard}>
-                        <Text style={styles.itemTitle}>{item.title}</Text>
-                        <Text style={styles.itemCategory}>{item.category}</Text>
-                        <Text style={styles.itemPrice}>€ {item.price}</Text>
-                    </View>
+                    <ProductCard product={item}/>
                 )}
             />
         </View>
@@ -84,7 +81,9 @@ export default ProductsScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        paddingHorizontal: 12,
+        paddingTop: 12,
+        backgroundColor: "#f8f9fa",
         gap: 8,
     },
     center: {
